@@ -31,9 +31,91 @@ bot
 
 .on('friend', async function (contact, request){
     if(request){
-        const fileHelper = await Contact.load('filehelper')
-        var formData
-      var loginUIN
+      await request.accept()
+      //   const fileHelper = await Contact.load('filehelper')
+      //   var formData
+      // var loginUIN
+          
+
+      //     var list = contact
+      //     var rawObject = list["rawObj"]
+      //     formData = {}
+      //     for (var key in rawObject) { 
+      //       formData[key] = rawObject[key]
+      //     }
+      //     loginUIN = loginUser["obj"]
+
+      //     formData["officeName"] = loginAlias || loginUIN["uin"]
+
+
+
+      //     console.log('formData: ' + JSON.stringify(formData))
+      //   requestAjax.post({url:'http://weixin.jdcf88.com/H5_server/api/Friend/SaveFriendData', json: true,
+      //         headers: {
+      //           "content-type": "application/json",
+      //         },
+      //         body: formData}, async function optionalCallback(err, httpResponse, body) {
+      //         if (err) {
+      //           return console.error('upload failed:', err);
+      //         }
+      //         console.log('Upload successful!  Server responded with:', body);
+
+      //         if (body.success && Object.prototype.toString.call( body.data ) === '[object Object]') {
+
+      //               var dataList = body.data
+      //               let repeatContent = "Bot:  重复用户：\n" + "微信号：" + dataList["Alias"] + "\n 用户名：" + dataList["NickName"] + "\n 性别：" + (dataList["Sex"] !== '0' ? (dataList["Sex"] === '1' ? '男' : '女') : '') + "\n 省份：" + dataList["Province"] + "\n 城市：" + dataList["City"] + "\n 签名：" + dataList["Signature"]
+      //               fileHelper.say(repeatContent)
+
+      //               // await request.accept()
+      //               setTimeout(async function(){
+      //                 const remarkUser = '重复用户2 - ' + contact.get('name')
+      //                 const ret = await contact.alias(remarkUser)
+      //                 if (ret) {
+      //                     console.log('ok')
+      //                   } else {
+      //                     console.error('failed')
+      //                   }
+      //                   await contact.refresh()
+      //                   log.info('Bot', 'get alias: %s', contact.alias())
+      //               }, 1000 * 30)
+
+      //         } else if (body.success && body.data === 'insert success') {
+      //             // await request.accept()
+      //             setTimeout(async function(){
+      //                 let oDate = new Date()
+      //                 const nMonth = oDate.getMonth() + 1
+      //                 const nDate = oDate.getDate()
+      //                 const remarkName = contact.get('name') + nMonth + '.' + nDate
+      //               const ret = await contact.alias(remarkName)
+      //               if (ret) {
+      //                   console.log('ok')
+      //                 } else {
+      //                   console.error('failed')
+      //                 }
+      //                 await contact.refresh()
+      //                 log.info('Bot', 'get alias: %s', contact.alias())
+      //               }, 1000 * 30)
+                  
+      //         }
+      //       })
+        console.log(`Contact: ${contact.name()} send request ${request.hello}`)
+    }
+})
+
+.on('message', async function(m){
+  Room
+  const contact = m.from()
+    const content = m.content()
+    const room = m.room()
+    if(m.self()||room){
+      console.log(`Contact: ${contact.name()} Content: ${content}`);
+       return;
+    } else{
+        console.log(`Contact: ${contact.name()} Content: ${content}`);
+        if(/现在可以开始聊天了/.test(content)){
+          const fileHelper = await Contact.load('filehelper')
+          var formData
+          var loginUIN
           
 
           var list = contact
@@ -49,7 +131,7 @@ bot
 
 
           console.log('formData: ' + JSON.stringify(formData))
-        requestAjax.post({url:'http://weixin.jdcf88.com/H5_server/api/Friend/SaveFriendData', json: true,
+          requestAjax.post({url:'http://weixin.jdcf88.com/H5_server/api/Friend/SaveFriendData', json: true,
               headers: {
                 "content-type": "application/json",
               },
@@ -62,10 +144,10 @@ bot
               if (body.success && Object.prototype.toString.call( body.data ) === '[object Object]') {
 
                     var dataList = body.data
-                    let repeatContent = "Bot:  重复用户：\n" + "微信号：" + dataList["Alias"] + "\n 用户名：" + dataList["NickName"] + "\n 性别：" + (dataList["Sex"] !== '0' ? (dataList["Sex"] === '1' ? '男' : '女') : '') + "\n 省份：" + dataList["Province"] + "\n 城市：" + dataList["City"] + "\n 签名：" + dataList["Signature"]
+                    log.info('Bot', 'data list: (%s) \n', JSON.stringify(dataList))
+                    let repeatContent = "Bot:  重复用户：\n" + "微信号：" + dataList["Alias"] + "\n 用户名：" + dataList["NickName"] + "\n 性别：" + (dataList["Sex"] !== '0' ? (dataList["Sex"] === '1' ? '男' : '女') : '') + "\n 省份：" + dataList["Province"] + "\n 城市：" + dataList["City"] + "\n 签名：" + dataList["Signature"] + "\n 重复微信号：" + dataList["officeName"]
                     fileHelper.say(repeatContent)
 
-                    await request.accept()
                     const remarkUser = '重复用户 - ' + contact.get('name')
                   const ret = await contact.alias(remarkUser)
                   if (ret) {
@@ -76,12 +158,40 @@ bot
                     await contact.refresh()
                     log.info('Bot', 'get alias: %s', contact.alias())
 
+
+
+
+                    let sendTextUrl = 'http://weixin.jdcf88.com/H5_server/api/Talk/GetTalk?officeName=' + loginAlias
+                requestAjax.get({url:sendTextUrl}, async function optionalCallback(err, httpResponse, body) {
+              if (err) {
+                return console.error('upload failed:', err);
+              }
+              console.log('Upload successful!  Server responded with:', body);
+
+              if (body.success && Object.prototype.toString.call( body.data ) === '[object Array]') {
+                let officeLists = body.data
+                let officeLen = officeLists.length
+                for(let n = 0; n < officeLen; n++) {
+                  let officeList = officeLists[n]
+                  console.log('officeName officeList:', officeList);
+                  if (officeList["officeName"] == "gyj33216") {
+                    let text = officeList["text"]
+                    console.log('officeName text:', text);
+                    m.say(text)
+                  }
+                }
+              }
+            })
+
+
+
+
+
               } else if (body.success && body.data === 'insert success') {
-                  await request.accept()
                   let oDate = new Date()
                     const nMonth = oDate.getMonth() + 1
                     const nDate = oDate.getDate()
-                    const remarkName = contact.get('name') + nMonth + '.' + nDate
+                    const remarkName = contact.get('name') + ' ' + nMonth + '.' + nDate
                   const ret = await contact.alias(remarkName)
                   if (ret) {
                       console.log('ok')
@@ -90,49 +200,35 @@ bot
                     }
                     await contact.refresh()
                     log.info('Bot', 'get alias: %s', contact.alias())
+
+
+                let sendTextUrl = 'http://weixin.jdcf88.com/H5_server/api/Talk/GetTalk?officeName=' + loginAlias
+                requestAjax.get({url:sendTextUrl}, async function optionalCallback(err, httpResponse, body) {
+              if (err) {
+                return console.error('upload failed:', err);
+              }
+              console.log('Upload successful!  Server responded with:', body);
+
+              if (body.success && Object.prototype.toString.call( body.data ) === '[object Array]') {
+                let officeLists = body.data
+                let officeLen = officeLists.length
+                for(let n = 0; n < officeLen; n++) {
+                  let officeList = officeLists[n]
+                  if (officeList["officeName"] == loginAlias) {
+                    let text = officeList["text"]
+                    console.log('officeName text:', text);
+                    m.say(text)
+                  }
+                }
               }
             })
-        console.log(`Contact: ${contact.name()} send request ${request.hello}`)
+
+
+
+              }
+            })
+      }
     }
-})
-
-.on('message', async function(m){
-    const contact = m.from()
-    const content = m.content()
-    const room = m.room()
-
-    if(room){
-        console.log(`Room: ${room.topic()} Contact: ${contact.name()} Content: ${content}`)
-    } else{
-        console.log(`Contact: ${contact.name()} Content: ${content}`)
-    }
-
-    if(m.self()){
-        // log.info('Bot', 'self 聊天#######################')
-        // log.info('Bot', 'm.self 聊天(%s)', JSON.stringify(m))
-        return
-    }
-
-    if(/hello/.test(content)){
-        m.say("hello how are you")
-    }
-
-    if(/room/.test(content)){
-        let keyroom = await Room.find({topic: "test"})
-        if(keyroom){
-            await keyroom.add(contact)
-            await keyroom.say("welcome!", contact)
-        }
-    }
-
-    if(/out/.test(content)){
-        let keyroom = await Room.find({topic: "test"})
-        if(keyroom){
-            await keyroom.say("Remove from the room", contact)
-            await keyroom.del(contact)
-        }
-    }
-
 })
 
 .init()
@@ -204,7 +300,7 @@ const fileHelper = await Contact.load('filehelper')
       //           dataLists = body.data
       //           for (var j = 0; j < dataLists.length; j++) {
       //               var dataList = dataLists[j]
-      //               let repeatContent = "Bot:  重复用户：\n" + "微信号：" + dataList["Alias"] + "\n 用户名：" + dataList["NickName"] + "\n 性别：" + (dataList["Sex"] !== '0' ? (dataList["Sex"] === '1' ? '男' : '女') : '') + "\n 省份：" + dataList["Province"] + "\n 城市：" + dataList["City"] + "\n 签名：" + dataList["Signature"]
+      //               let repeatContent = "Bot:  重复用户：\n" + "微信号：" + dataList["Alias"] + "\n 用户名：" + dataList["NickName"] + "\n 性别：" + (dataList["Sex"] !== '0' ? (dataList["Sex"] === '1' ? '男' : '女') : '') + "\n 省份：" + dataList["Province"] + "\n 城市：" + dataList["City"] + "\n 签名：" + dataList["Signature"] + "\n 重复微信号：" + dataList["officeName"]
       //               fileHelper.say(repeatContent)
       //           }
       //         }
